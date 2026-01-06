@@ -65,6 +65,9 @@ func (c *Converter) ConvertOne(inPath, outDir, outFmt string) (bool, bool, error
 	if strings.ToLower(outFmt) == "jpg" {
 		args = append(args, "-q:v", "2")
 	}
+	if mime.IsImageFormat(outFmt) && strings.ToLower(outFmt) != "gif" {
+		args = append(args, "-frames:v", "1", "-update", "1")
+	}
 	args = append(args, outPath)
 
 	err := c.runFFmpeg(args)

@@ -26,6 +26,7 @@ type Config struct {
 	ToFormat string
 
 	Append    bool
+	Replace   bool
 	Mute      bool
 	FullyMute bool
 

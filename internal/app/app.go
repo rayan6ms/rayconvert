@@ -63,7 +63,7 @@ func Run(args []string, bi BuildInfo) int {
 		}
 		if ok {
 			converted++
-			if !cfg.Append {
+			if cfg.Replace {
 				_ = os.Remove(path)
 			}
 		}

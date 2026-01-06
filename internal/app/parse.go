@@ -9,6 +9,7 @@ import (
 )
 
 func ParseArgs(args []string, bi BuildInfo) (Config, error) {
+	outExplicit := false
 	cfg := Config{
 		InDir:  mustAbs("."),
 		OutDir: mustAbs("."),
@@ -36,6 +37,9 @@ func ParseArgs(args []string, bi BuildInfo) (Config, error) {
 		case low == "-ap" || low == "--append":
 			cfg.Append = true
 			i++
+		case low == "-r" || low == "--replace":
+			cfg.Replace = true
+			i++
 		case low == "-m" || low == "--mute":
 			cfg.Mute = true
 			i++
@@ -49,6 +53,7 @@ func ParseArgs(args []string, bi BuildInfo) (Config, error) {
 			i++
 		case strings.HasPrefix(low, "out="):
 			cfg.OutDir = mustAbs(a[4:])
+			outExplicit = true
 			i++
 
 		case strings.HasPrefix(low, "--input="):
@@ -63,6 +68,7 @@ func ParseArgs(args []string, bi BuildInfo) (Config, error) {
 
 		case strings.HasPrefix(low, "--output="):
 			cfg.OutDir = mustAbs(a[len("--output="):])
+			outExplicit = true
 			i++
 		case low == "--output":
 			if i+1 >= len(args) {
@@ -102,6 +108,9 @@ subject:
 		case low == "-ap" || low == "--append":
 			cfg.Append = true
 			i++
+		case low == "-r" || low == "--replace":
+			cfg.Replace = true
+			i++
 		case low == "-m" || low == "--mute":
 			cfg.Mute = true
 			i++
@@ -117,6 +126,7 @@ subject:
 			i++
 		case strings.HasPrefix(low, "out="):
 			cfg.OutDir = mustAbs(a[4:])
+			outExplicit = true
 			i++
 		case strings.HasPrefix(low, "--input="):
 			if seenTo {
@@ -188,6 +198,10 @@ subject:
 			cfg.FilePath = mustAbs(cfg.SubjectRaw)
 			cfg.InDir = mustAbs(filepath.Dir(cfg.FilePath))
 		}
+	}
+
+	if !outExplicit {
+		cfg.OutDir = cfg.InDir
 	}
 
 	if st, err := os.Stat(cfg.OutDir); err != nil || !st.IsDir() {
