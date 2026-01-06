@@ -178,7 +178,7 @@ subject:
 
 	// validate outdir exists
 	if st, err := os.Stat(cfg.OutDir); err != nil || !st.IsDir() {
-		return cfg, usageErr("output directory not found: " + cfg.OutDir)
+		return cfg, usageErrf("output directory not found: %s", cfg.OutDir)
 	}
 
 	return cfg, nil
@@ -194,12 +194,17 @@ func normalizeFormat(s string) string {
 	return s
 }
 
-type usageErr string
+type usageError string
 
-func (e usageErr) Error() string { return string(e) }
+func (e usageError) Error() string { return string(e) }
 
-func usageErrf(f string, a ...any) error { return usageErr(fmt.Sprintf(f, a...)) }
-func usageErr(s string) error            { return usageErr(s) }
+func usageErrf(f string, a ...any) error { return usageError(fmt.Sprintf(f, a...)) }
+func usageErr(s string) error            { return usageError(s) }
+
+func IsUsageErr(err error) bool {
+	var ue usageError
+	return errors.As(err, &ue)
+}
 
 func mustAbs(p string) string {
 	// accept quoted values naturally (shell strips quotes before passing args).
@@ -208,9 +213,4 @@ func mustAbs(p string) string {
 		return p
 	}
 	return abs
-}
-
-func IsUsageErr(err error) bool {
-	var ue usageErr
-	return errors.As(err, &ue)
 }
