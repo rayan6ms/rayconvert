@@ -48,6 +48,53 @@ func ParseArgs(args []string, bi BuildInfo) (Config, error) {
 			cfg.Mute = true
 			i++
 
+		case strings.HasPrefix(low, "-in="):
+			cfg.InDir = mustAbs(a[4:])
+			i++
+
+		case low == "-in":
+			if i+1 >= len(args) {
+				return cfg, usageErr("-in requires a value")
+			}
+			cfg.InDir = mustAbs(args[i+1])
+			i += 2
+
+		case strings.HasPrefix(low, "-out="):
+			cfg.OutDir = mustAbs(a[5:])
+			outExplicit = true
+			i++
+
+		case low == "-out":
+			if i+1 >= len(args) {
+				return cfg, usageErr("-out requires a value")
+			}
+			cfg.OutDir = mustAbs(args[i+1])
+			outExplicit = true
+			i += 2
+		case low == "-o":
+			if i+1 >= len(args) {
+				return cfg, usageErr("-o requires a value")
+			}
+			cfg.OutDir = mustAbs(args[i+1])
+			outExplicit = true
+			i += 2
+
+		case strings.HasPrefix(low, "-o="):
+			cfg.OutDir = mustAbs(a[3:])
+			outExplicit = true
+			i++
+
+		case low == "-i":
+			if i+1 >= len(args) {
+				return cfg, usageErr("-i requires a value")
+			}
+			cfg.InDir = mustAbs(args[i+1])
+			i += 2
+
+		case strings.HasPrefix(low, "-i="):
+			cfg.InDir = mustAbs(a[3:])
+			i++
+
 		case strings.HasPrefix(low, "in="):
 			cfg.InDir = mustAbs(a[3:])
 			i++
@@ -118,6 +165,59 @@ subject:
 			cfg.FullyMute = true
 			cfg.Mute = true
 			i++
+		case strings.HasPrefix(low, "-in="):
+			if seenTo {
+				return cfg, usageErr("-in=... must appear before 'to'")
+			}
+			cfg.InDir = mustAbs(a[4:])
+			i++
+
+		case low == "-in":
+			if i+1 >= len(args) {
+				return cfg, usageErr("-in requires a value")
+			}
+			if seenTo {
+				return cfg, usageErr("-in must appear before 'to'")
+			}
+			cfg.InDir = mustAbs(args[i+1])
+			i += 2
+
+		case strings.HasPrefix(low, "-out="):
+			cfg.OutDir = mustAbs(a[5:])
+			outExplicit = true
+			i++
+
+		case low == "-out":
+			if i+1 >= len(args) {
+				return cfg, usageErr("-out requires a value")
+			}
+			cfg.OutDir = mustAbs(args[i+1])
+			outExplicit = true
+			i += 2
+		case low == "-o":
+			if i+1 >= len(args) {
+				return cfg, usageErr("-o requires a value")
+			}
+			cfg.OutDir = mustAbs(args[i+1])
+			outExplicit = true
+			i += 2
+
+		case strings.HasPrefix(low, "-o="):
+			cfg.OutDir = mustAbs(a[3:])
+			outExplicit = true
+			i++
+
+		case low == "-i":
+			if i+1 >= len(args) {
+				return cfg, usageErr("-i requires a value")
+			}
+			cfg.InDir = mustAbs(args[i+1])
+			i += 2
+
+		case strings.HasPrefix(low, "-i="):
+			cfg.InDir = mustAbs(a[3:])
+			i++
+
 		case strings.HasPrefix(low, "in="):
 			if seenTo {
 				return cfg, usageErr("in=... must appear before 'to'")
