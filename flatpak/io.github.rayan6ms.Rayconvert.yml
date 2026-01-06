@@ -26,7 +26,7 @@ modules:
 
       - install -Dm644 flatpak/io.github.rayan6ms.Rayconvert.desktop /app/share/applications/io.github.rayan6ms.Rayconvert.desktop
       - install -Dm644 flatpak/io.github.rayan6ms.Rayconvert.metainfo.xml /app/share/metainfo/io.github.rayan6ms.Rayconvert.metainfo.xml
-      - install -Dm644 flatpak/io.github.rayan6ms.Rayconvert.svg /app/share/icons/hicolor/scalable/apps/io.github.rayan6ms.Rayconvert.svg
+      - install -Dm644 flatpak/io.github.rayan6ms.Rayconvert.png /app/share/icons/hicolor/scalable/apps/io.github.rayan6ms.Rayconvert.png
 
     sources:
       - type: dir
