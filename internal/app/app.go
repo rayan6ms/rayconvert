@@ -77,6 +77,14 @@ func Run(args []string, bi BuildInfo) int {
 				}
 			}
 
+			if cfg.InFormat != "" {
+				ext := normalizeFormat(filepath.Ext(p))
+				if ext != cfg.InFormat {
+					skipped++
+					continue
+				}
+			}
+
 			convertOne(p)
 		}
 	}
@@ -96,7 +104,8 @@ func pathBaseForDetect(p string) string { return filepath.Dir(p) }
 
 func printUsage(f *os.File) {
 	fmt.Fprintln(f, `Usage:
-  rayconvert (FILE|DIR|images|videos) [in=DIR|-i DIR|--input DIR] to FORMAT [out=DIR|-o DIR|--output DIR] [-ap|--append] [-r|--replace] [-m|--mute] [-fm|--fully-mute]
+  rayconvert (FILE|DIR|images|videos|FORMAT) [in=DIR|-i DIR|--input DIR] to FORMAT [out=DIR|-o DIR|--output DIR] [-ap|--append] [-r|--replace] [-m|--mute] [-fm|--fully-mute]
+  rayconvert [in=DIR|-i DIR|--input DIR] to FORMAT [out=DIR|-o DIR|--output DIR] [-ap|--append] [-r|--replace] [-m|--mute] [-fm|--fully-mute]
   rayconvert --help
   rayconvert --version
 
@@ -105,6 +114,8 @@ Notes:
   - If out/out= is not provided, output defaults to the input directory.
   - "jpeg" is treated as "jpg"
   - DIR is treated as "images in that directory" (so: rayconvert . to jpg)
+  - If subject is a format (e.g. mkv/png), rayconvert converts only that format from the input directory.
+  - If subject is omitted, it is inferred from the output format (videos or images).
   - "videos ... to jpg" is rejected (videos require video output formats)
   - Paths accept quotes via your shell, and "~" is expanded (e.g. in="~/Pictures")`)
 }

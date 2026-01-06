@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/rayan6ms/rayconvert/internal/mime"
 )
 
 func ParseArgs(args []string, bi BuildInfo) (Config, error) {
@@ -134,11 +136,15 @@ func ParseArgs(args []string, bi BuildInfo) (Config, error) {
 
 subject:
 	if i >= len(args) {
-		return cfg, usageErr("missing required subject (FILE|DIR|images|videos)")
+		return cfg, usageErr("missing required subject or 'to'")
 	}
 
-	cfg.SubjectRaw = args[i]
-	i++
+	if strings.EqualFold(args[i], "to") {
+		cfg.SubjectRaw = ""
+	} else {
+		cfg.SubjectRaw = args[i]
+		i++
+	}
 
 	seenTo := false
 	for i < len(args) {
@@ -281,23 +287,44 @@ subject:
 	// determine subject kind
 	subLow := strings.ToLower(cfg.SubjectRaw)
 	switch subLow {
+	case "":
+		if mime.IsVideoFormat(cfg.ToFormat) {
+			cfg.Subject = SubjectVideos
+		} else if mime.IsImageFormat(cfg.ToFormat) {
+			cfg.Subject = SubjectImages
+		} else {
+			return cfg, usageErr("missing required subject (FILE|DIR|images|videos) and cannot infer from output format: " + cfg.ToFormat)
+		}
 	case "images":
 		cfg.Subject = SubjectImages
 	case "videos":
 		cfg.Subject = SubjectVideos
 	default:
 		fi, err := os.Stat(cfg.SubjectRaw)
-		if err != nil {
-			return cfg, usageErr("subject not found: " + cfg.SubjectRaw)
+		if err == nil {
+			if fi.IsDir() {
+				cfg.Subject = SubjectDirImages
+				cfg.InDir = mustAbs(cfg.SubjectRaw)
+			} else {
+				cfg.Subject = SubjectFile
+				cfg.FilePath = mustAbs(cfg.SubjectRaw)
+				cfg.InDir = mustAbs(filepath.Dir(cfg.FilePath))
+			}
+			break
 		}
-		if fi.IsDir() {
-			cfg.Subject = SubjectDirImages
-			cfg.InDir = mustAbs(cfg.SubjectRaw)
-		} else {
-			cfg.Subject = SubjectFile
-			cfg.FilePath = mustAbs(cfg.SubjectRaw)
-			cfg.InDir = mustAbs(filepath.Dir(cfg.FilePath))
+
+		inFmt := normalizeFormat(cfg.SubjectRaw)
+		if mime.IsVideoFormat(inFmt) {
+			cfg.Subject = SubjectVideos
+			cfg.InFormat = inFmt
+			break
 		}
+		if mime.IsImageFormat(inFmt) {
+			cfg.Subject = SubjectImages
+			cfg.InFormat = inFmt
+			break
+		}
+		return cfg, usageErr("subject not found: " + cfg.SubjectRaw)
 	}
 
 	if !outExplicit {

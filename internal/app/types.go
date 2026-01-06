@@ -23,6 +23,7 @@ type Config struct {
 	InDir    string
 	OutDir   string
 
+	InFormat string
 	ToFormat string
 
 	Append    bool
