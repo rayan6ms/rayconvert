@@ -19,14 +19,22 @@ modules:
       env:
         GOROOT: /usr/lib/sdk/golang
     build-commands:
-      - go build -trimpath -o /app/bin/rayconvert ./cmd/rayconvert
+      - |
+        VERSION="${RAYCONVERT_VERSION:-dev}"
+        COMMIT="${RAYCONVERT_COMMIT:-none}"
+        DATE="${RAYCONVERT_DATE:-unknown}"
+        go build -trimpath -ldflags "-s -w \
+          -X main.version=${VERSION} \
+          -X main.commit=${COMMIT} \
+          -X main.date=${DATE}" \
+          -o /app/bin/rayconvert ./cmd/rayconvert
 
       - install -Dm644 man/rayconvert.1 /app/share/man/man1/rayconvert.1
       - install -Dm644 LICENSE /app/share/licenses/${FLATPAK_ID}/LICENSE
 
       - install -Dm644 flatpak/io.github.rayan6ms.Rayconvert.desktop /app/share/applications/io.github.rayan6ms.Rayconvert.desktop
       - install -Dm644 flatpak/io.github.rayan6ms.Rayconvert.metainfo.xml /app/share/metainfo/io.github.rayan6ms.Rayconvert.metainfo.xml
-      - install -Dm644 flatpak/io.github.rayan6ms.Rayconvert.png /app/share/icons/hicolor/scalable/apps/io.github.rayan6ms.Rayconvert.png
+      - install -Dm644 flatpak/io.github.rayan6ms.Rayconvert.png /app/share/icons/hicolor/512x512/apps/io.github.rayan6ms.Rayconvert.png
 
     sources:
       - type: dir

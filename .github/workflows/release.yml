@@ -56,12 +56,20 @@ jobs:
             org.freedesktop.Sdk.Extension.golang//25.08
 
       - name: Build Flatpak bundle
+        env:
+          RAYCONVERT_VERSION: ${{ github.ref_name }}
         run: |
+          export RAYCONVERT_COMMIT="${GITHUB_SHA::7}"
+          export RAYCONVERT_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           rm -rf build-dir repo
-          flatpak-builder --force-clean --repo=repo build-dir flatpak/io.github.rayan6ms.Rayconvert.yml
+          flatpak-builder --force-clean --repo=repo --default-branch=stable build-dir flatpak/io.github.rayan6ms.Rayconvert.yml
           flatpak build-update-repo repo
-          flatpak build-bundle repo rayconvert.flatpak io.github.rayan6ms.Rayconvert \
+          flatpak build-bundle repo rayconvert.flatpak io.github.rayan6ms.Rayconvert stable \
             --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
+
+          flatpak install -y --user ./rayconvert.flatpak
+          flatpak run io.github.rayan6ms.Rayconvert --version
+          flatpak uninstall -y --user io.github.rayan6ms.Rayconvert
 
       - name: Upload release assets (flatpak)
         uses: softprops/action-gh-release@v2
