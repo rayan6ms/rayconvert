@@ -1,14 +1,28 @@
 app-id: io.github.rayan6ms.Rayconvert
 runtime: org.freedesktop.Platform
-runtime-version: '23.08'
+runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
 command: rayconvert
+
+finish-args:
+  # CLI tool needs access to user files; tighten this later if you want.
+  - --filesystem=host
+  # Needed to use flatpak-spawn --host
+  - --talk-name=org.freedesktop.Flatpak
 
 modules:
   - name: rayconvert
     buildsystem: simple
+    build-options:
+      env:
+        # Use the Go SDK extension (recommended approach)
+        FLATPAK_ENABLE_SDK_EXT: golang
+        GOROOT: /usr/lib/sdk/golang
+        PATH: /usr/lib/sdk/golang/bin:/usr/bin:/bin
     build-commands:
-      - go build -o /app/bin/rayconvert ./cmd/rayconvert
+      - go build -trimpath -o /app/bin/rayconvert ./cmd/rayconvert
+      - install -Dm644 man/rayconvert.1 /app/share/man/man1/rayconvert.1
+      - install -Dm644 LICENSE /app/share/licenses/${FLATPAK_ID}/LICENSE
     sources:
       - type: dir
-        path: .
+        path: ..

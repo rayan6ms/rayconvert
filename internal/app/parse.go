@@ -32,6 +32,7 @@ func ParseArgs(args []string, bi BuildInfo) (Config, error) {
 		case low == "--version":
 			cfg.Version = true
 			return cfg, nil
+
 		case low == "-ap" || low == "--append":
 			cfg.Append = true
 			i++
@@ -42,6 +43,14 @@ func ParseArgs(args []string, bi BuildInfo) (Config, error) {
 			cfg.FullyMute = true
 			cfg.Mute = true
 			i++
+
+		case strings.HasPrefix(low, "in="):
+			cfg.InDir = mustAbs(a[3:])
+			i++
+		case strings.HasPrefix(low, "out="):
+			cfg.OutDir = mustAbs(a[4:])
+			i++
+
 		case strings.HasPrefix(low, "--input="):
 			cfg.InDir = mustAbs(a[len("--input="):])
 			i++
@@ -51,6 +60,7 @@ func ParseArgs(args []string, bi BuildInfo) (Config, error) {
 			}
 			cfg.InDir = mustAbs(args[i+1])
 			i += 2
+
 		case strings.HasPrefix(low, "--output="):
 			cfg.OutDir = mustAbs(a[len("--output="):])
 			i++
@@ -60,10 +70,11 @@ func ParseArgs(args []string, bi BuildInfo) (Config, error) {
 			}
 			cfg.OutDir = mustAbs(args[i+1])
 			i += 2
+
 		case strings.HasPrefix(low, "-"):
 			return cfg, usageErr("unknown option: " + a)
+
 		default:
-			// first non-option > subject
 			goto subject
 		}
 	}
@@ -136,6 +147,9 @@ subject:
 			i++
 		default:
 			if !seenTo {
+				if strings.EqualFold(a, "images") || strings.EqualFold(a, "videos") {
+					return cfg, usageErr("unexpected '" + a + "' before 'to'. Hint: subject must be first (e.g. `rayconvert images in=DIR to jpg`) or use `--input DIR` before subject.")
+				}
 				return cfg, usageErr("unexpected argument before 'to': " + a)
 			}
 			if cfg.ToFormat == "" {
@@ -176,7 +190,6 @@ subject:
 		}
 	}
 
-	// validate outdir exists
 	if st, err := os.Stat(cfg.OutDir); err != nil || !st.IsDir() {
 		return cfg, usageErrf("output directory not found: %s", cfg.OutDir)
 	}
@@ -207,10 +220,26 @@ func IsUsageErr(err error) bool {
 }
 
 func mustAbs(p string) string {
-	// accept quoted values naturally (shell strips quotes before passing args).
+	p = strings.TrimSpace(p)
+	p = expandTilde(p)
+
 	abs, err := filepath.Abs(p)
 	if err != nil {
 		return p
 	}
 	return abs
+}
+
+func expandTilde(p string) string {
+	if p == "~" || strings.HasPrefix(p, "~/") {
+		home, err := os.UserHomeDir()
+		if err != nil || home == "" {
+			return p
+		}
+		if p == "~" {
+			return home
+		}
+		return filepath.Join(home, p[2:])
+	}
+	return p
 }
