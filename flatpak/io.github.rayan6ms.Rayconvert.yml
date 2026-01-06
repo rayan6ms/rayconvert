@@ -4,21 +4,20 @@ runtime-version: '25.08'
 sdk: org.freedesktop.Sdk
 command: rayconvert
 
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.golang
+
 finish-args:
-  # CLI tool needs access to user files; tighten this later if you want.
   - --filesystem=host
-  # Needed to use flatpak-spawn --host
   - --talk-name=org.freedesktop.Flatpak
 
 modules:
   - name: rayconvert
     buildsystem: simple
     build-options:
+      append-path: /usr/lib/sdk/golang/bin
       env:
-        # Use the Go SDK extension (recommended approach)
-        FLATPAK_ENABLE_SDK_EXT: golang
         GOROOT: /usr/lib/sdk/golang
-        PATH: /usr/lib/sdk/golang/bin:/usr/bin:/bin
     build-commands:
       - go build -trimpath -o /app/bin/rayconvert ./cmd/rayconvert
       - install -Dm644 man/rayconvert.1 /app/share/man/man1/rayconvert.1
