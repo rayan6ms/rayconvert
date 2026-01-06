@@ -26,27 +26,6 @@ func Run(args []string, bi BuildInfo) int {
 		return 0
 	}
 
-	// enforce format compatibility for group modes
-	if cfg.Subject == SubjectVideos {
-		if mime.IsImageFormat(cfg.ToFormat) {
-			fmt.Fprintln(os.Stderr, "rayconvert: invalid target: videos to", cfg.ToFormat, "(image format)")
-			return 2
-		}
-		if !mime.IsVideoFormat(cfg.ToFormat) {
-			fmt.Fprintln(os.Stderr, "rayconvert: invalid target: videos to", cfg.ToFormat, "(unknown video format)")
-			return 2
-		}
-	} else if cfg.Subject == SubjectImages || cfg.Subject == SubjectDirImages {
-		if mime.IsVideoFormat(cfg.ToFormat) {
-			fmt.Fprintln(os.Stderr, "rayconvert: invalid target: images to", cfg.ToFormat, "(video format)")
-			return 2
-		}
-		if !mime.IsImageFormat(cfg.ToFormat) {
-			fmt.Fprintln(os.Stderr, "rayconvert: invalid target: images to", cfg.ToFormat, "(unknown image format)")
-			return 2
-		}
-	}
-
 	conv := ff.NewConverter(cfg.Mute, cfg.FullyMute, cfg.Append)
 
 	converted, skipped, failed := 0, 0, 0
@@ -71,17 +50,7 @@ func Run(args []string, bi BuildInfo) int {
 
 	switch cfg.Subject {
 	case SubjectFile:
-		// for single file validate based on detected type
-		kind := mime.DetectKind(pathBaseForDetect(cfg.FilePath), cfg.FilePath)
-		if kind == mime.KindImage && !mime.IsImageFormat(cfg.ToFormat) {
-			fmt.Fprintln(os.Stderr, "rayconvert: file is an image; target format must be an image format")
-			failed++
-		} else if kind == mime.KindVideo && !(mime.IsVideoFormat(cfg.ToFormat) || mime.IsImageFormat(cfg.ToFormat)) {
-			fmt.Fprintln(os.Stderr, "rayconvert: file is a video; target must be a video format or image format (thumbnail)")
-			failed++
-		} else {
-			convertOne(cfg.FilePath)
-		}
+		convertOne(cfg.FilePath)
 
 	default:
 		entries, err := os.ReadDir(cfg.InDir)
@@ -95,17 +64,19 @@ func Run(args []string, bi BuildInfo) int {
 			}
 			p := filepath.Join(cfg.InDir, e.Name())
 
+			kind := mime.DetectKind(pathBaseForDetect(p), p)
 			if cfg.Subject == SubjectVideos {
-				if mime.DetectKind(pathBaseForDetect(p), p) != mime.KindVideo {
+				if kind != mime.KindVideo {
 					skipped++
 					continue
 				}
 			} else {
-				if mime.DetectKind(pathBaseForDetect(p), p) != mime.KindImage {
+				if kind != mime.KindImage {
 					skipped++
 					continue
 				}
 			}
+
 			convertOne(p)
 		}
 	}

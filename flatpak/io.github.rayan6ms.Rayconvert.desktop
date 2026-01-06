@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=rayconvert
+Comment=Readable CLI wrapper around ffmpeg for converting images and videos
+Exec=rayconvert
+Terminal=true
+Categories=Utility;AudioVideo;
+Icon=io.github.rayan6ms.Rayconvert
