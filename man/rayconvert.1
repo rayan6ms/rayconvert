@@ -1,0 +1,54 @@
+.TH RAYCONVERT 1 "January 2026" "User Commands"
+.SH NAME
+rayconvert \- convert a file or batch of images/videos using ffmpeg
+.SH SYNOPSIS
+.B rayconvert
+.RI ( FILE | DIR | images | videos )
+.RI [ in=DIR ]
+.B to
+.RI FORMAT
+.RI [ out=DIR ]
+.RI [ -ap | --append ]
+.RI [ -m | --mute ]
+.RI [ -fm | --fully-mute ]
+.PP
+.B rayconvert
+.BR --help " | " --version
+.SH DESCRIPTION
+rayconvert converts either a single file or a set of files (images/videos) using ffmpeg.
+By default it replaces originals (deletes the original after a successful conversion).
+.SH RULES
+.IP \[bu] 2
+The first non-option argument is required and must be FILE, DIR, images, or videos.
+.IP \[bu]
+DIR is treated as an input directory for images (so \fBrayconvert . to jpg\fR is valid).
+.IP \[bu]
+The keyword \fBto\fR is required (case-insensitive).
+.IP \[bu]
+FORMAT is required (case-insensitive). A leading dot is allowed. \fBjpeg\fR is treated as \fBjpg\fR.
+.IP \[bu]
+If \fBvideos\fR is used, FORMAT must be a video format (e.g. mp4/mkv/webm). Image formats are rejected.
+.IP \[bu]
+If \fBimages\fR or DIR is used, FORMAT must be an image format (e.g. jpg/png/webp). Video formats are rejected.
+.IP \[bu]
+in=DIR and out=DIR accept quoted values via your shell (e.g. out="path with spaces").
+.SH OPTIONS
+.TP
+.BR in=DIR ", " --input=DIR ", " --input " DIR
+Input directory (for images/videos modes). Defaults to current directory.
+.TP
+.BR out=DIR ", " --output=DIR ", " --output " DIR
+Output directory. Defaults to current directory.
+.TP
+.BR -ap ", " --append
+Append mode: keep originals. If output name exists, a unique name is chosen.
+.TP
+.BR -m ", " --mute
+Hide ffmpeg output and print simplified messages.
+.TP
+.BR -fm ", " --fully-mute
+Print nothing at all (implies --mute). Exit code still indicates success/failure.
+.SH EXIT STATUS
+0 if all conversions succeed, 1 if any conversion fails, 2 on usage error.
+.SH SEE ALSO
+ffmpeg(1)

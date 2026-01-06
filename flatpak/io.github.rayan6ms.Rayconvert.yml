@@ -1,0 +1,14 @@
+app-id: io.github.rayan6ms.Rayconvert
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+command: rayconvert
+
+modules:
+  - name: rayconvert
+    buildsystem: simple
+    build-commands:
+      - go build -o /app/bin/rayconvert ./cmd/rayconvert
+    sources:
+      - type: dir
+        path: .
