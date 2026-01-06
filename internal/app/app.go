@@ -125,14 +125,15 @@ func pathBaseForDetect(p string) string { return filepath.Dir(p) }
 
 func printUsage(f *os.File) {
 	fmt.Fprintln(f, `Usage:
-  rayconvert (FILE|DIR|images|videos) [in=DIR] to FORMAT [out=DIR] [-ap|--append] [-m|--mute] [-fm|--fully-mute]
+  rayconvert (FILE|DIR|images|videos) [in=DIR|-i DIR|--input DIR] to FORMAT [out=DIR|-o DIR|--output DIR] [-ap|--append] [-r|--replace] [-m|--mute] [-fm|--fully-mute]
   rayconvert --help
   rayconvert --version
 
 Notes:
+  - Default behavior keeps originals (no deletion). Use -r/--replace to delete originals after successful conversion.
+  - If out/out= is not provided, output defaults to the input directory.
   - "jpeg" is treated as "jpg"
   - DIR is treated as "images in that directory" (so: rayconvert . to jpg)
   - "videos ... to jpg" is rejected (videos require video output formats)
-  - in= and out= accept quoted values via your shell (e.g. out="path with spaces")
-`)
+  - Paths accept quotes via your shell, and "~" is expanded (e.g. in="~/Pictures")`)
 }
